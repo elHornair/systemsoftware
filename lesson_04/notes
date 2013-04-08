@@ -1,0 +1,115 @@
+Synchronisation
+-------------------------------------------
+- Serielle Programme:
+    - Nicht nötig, weil durch Reihenfolge des Codes gegeben
+
+- Multiprozessorsystene:
+    - Prozesse müssen evtl aufeinander warten (Abhängigkeiten)
+    - Unix:
+        - myPid = fork()
+        - waitpid(myPid)
+    - In Thread-Welt:
+        - pthread_join(...) (analog zu waitpid)
+        - Mutexe:
+            - Mutual Exclusion (gegenseitiges Ausschliessen -> Nur einer darf gleichzeitig zugreifen)
+            - Da Heap von den Threads der Prozesse geteilt wird (z.B. globale Variablen), muss sichergestellt werden, dass sie sich nicht in Query kommen
+            - Eine Ressource wird durch Mutex geschützt (Schloss, das gefragt werden muss, ob auf Ressource zugegriffen werden darf)
+            - pthread_mutex_lock / pthread_mutex_unlock -> Alles zwischen lock und unlock wird garantiert nacheinander ausgeführt (atomare Einheit) 
+            - Bedingungen: pthread_cond
+
+
+Thread Kommunikation
+-------------------------------------------
+- Mutex Kommunikation -> nicht so teuer, sehr einfach
+- Globale Variablen
+- IPC
+    - Sockets
+    - Shared Memory
+    - Message Passing
+    -> Alle ziemlich teuer, weil jedes Mal ein OS-Aufruf
+
+
+Identität
+-------------------------------------------
+- pthread_self (kann in Kombination mit pthread_equal(id) überprüfen, ob es sich bei einem Thread um sich selbst handelt)
+
+
+Terminierung
+-------------------------------------------
+- Prozess wird am Ende von main() beendet -> Betriebssystemaufruf exit()
+- Threads werden am Ende automatisch beendet
+- Alternative: pthread_exit() oder pthread_cancel()
+
+
+Exit Status & Rückgabewert
+-------------------------------------------
+- Pthread kann joinable oder detached sein -> Rückgabewert
+- pthread_join() nur für joinable Pthread möglich:
+    - int pthread_join(pthread_t th, void **thread_return);
+- Rückgabewert kommt entweder von
+    - pthread_exit() oder die
+    - oder von Funktion, welche pthread_create() ausführt
+- pthread_create() führt eine Funktion aus, welche (void *) zurückgibt
+
+
+Bibliotheksaufrufe & Fehler
+-------------------------------------------
+- Pthread Bibliotheksaufrufe: Geben bei Erfolg Null, sonst Fehlercode zurück
+- Beispiel: 
+    if (rtn = pthread_create(...)) {
+        fprintf(stderr, "Fehler: pthread_create");
+    }
+- Rausfinden, welche Fehler eine Pthread-Funktion schmeisst: "man pthread_create"
+- Klartext des Fehlers ausgeben:
+    if (rtn = pthread_create(...))
+        fprintf(stderr, "Fehler: pthread_create, %s\n", strerror(rtn)),
+    }
+
+
+Modelle
+-------------------------------------------
+- Boss-Worker:
+    - Boss erhält Daten und gibt Sie an Worker-Threads weiter
+    - Boss soll möglichst wenig Arbeit machen (damit er nicht die Worker blockieren kann)
+    - Aufgabe des Bosses: Verteilung der Arbeit an die Worker
+    - Beispielcode:
+    
+        main {// boss
+            for (;;)// unendlicher Loop
+            hole aufgabe
+            switch aufgabe
+                case X: pthread_create task_X// worker 1
+                case Y: pthread_create task_Y// worker 2
+                ...
+        }
+    - Verbesserung: Thread-Pools
+        - Definierte Menge von Threads schon im Voraus erstellen
+        - Weniger Overhead mit Threads erstellen, dafür etwas mehr mit Threads verwalten
+        -> FIFO
+    - Einsatzgebiet:
+        - Alle Client-Server Geschichten
+        - Z.B. ein Load-Balancer
+- Peer Modell:
+    - Einzelne Threads sind voneinander unabhängig
+    - Kein Chef. Ein Thread muss aber alle anderen erstellen
+    - Geeignet, wenn unabhängige Aufgaben mit wenig Koordination
+    - Möglichst wenig geteilte Ressourcen -> Damit Peers nicht zu oft synchronisiert werden müssen
+- Pipeline:
+    - Input-Stream, mit jedem Paket müssen einige Schritte durchgeführt werden
+    - 1 Thread pro Arbeitsschritt
+    - 1. Thread erhält Input, letzter Thread stellt Output bereit
+    - Während Thread 2, das 1. Paket verarbeitet, arbeitet Thread 1 schon am 2. Paket. Thread 3 tut zu diesem Zeitpunkt noch nichts
+    - Nachteil: Dauert länger für einzelnes Datum
+    - Nachteil: System ist so langsam, wie schwächstes Glied -> Lösung: Z.B. mehrere von diesen haben
+    - Vorteil: Ist schneller für viele Daten
+    - Anwendungen: Z.B. etwas filtern (Kriterium 1 -> Kriterium 2 -> ...)
+    - Kommunikation zwischen Threads: Message-Passing (so funktioniert Erlang, Haskell, ...)   
+-> Auch Kombinationen möglich
+
+- Datenbuffering besprochen (siehe Pseudocode)
+
+
+
+
+
+

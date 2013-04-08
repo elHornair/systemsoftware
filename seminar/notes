@@ -1,0 +1,32 @@
+Seminararbeit:
+-----------------------------------------------------------
+
+Wiki:
+- http://edu.panter.ch/SystemSoftware
+- usr: student
+- pwd: hsz-t
+
+
+Aufgabenstellung:
+- http://edu.panter.ch/Mesh
+
+Hilfe-Scripts:
+- https://github.com/tpo/common_network
+
+
+Thema:
+- Pthreads
+- Mesh networking
+-> See wiki
+
+
+
+
+Doku:
+- Kurz schreiben, was man gemacht hat, was man für Probleme hatte, wie man sie gelöst hat
+- "Kein Geschwafel" -> Kurz 2-3 Sätze zur Aufgabenstellung (man kann auf Wiki verweisen)
+- Zwischen 1 und 7 Seiten (~5)
+- Handout brauchts nicht
+
+Präsi:
+- 10min
