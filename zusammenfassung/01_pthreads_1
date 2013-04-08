@@ -42,20 +42,131 @@ Warum Threads?
 - Heute werden CPUs kaum mehr schneller -> Deshalb mehr CPUs (Anzahl Cores / Rechner verdoppelt sich ungefähr alle 2 Jahre ("Neues Moore-Law"))
 
 
+Was sind Threads?
+- Semantisch: Voneinander parallel ausgeführte Programmteile innerhalb des gleichen Prozesses
+- Syntaktisch: Z.B. mit pthread_create (Thread erstellen mit Pthreads)
+- Pthread definiert Thread durch Funktion, die Start und Ende des Threads definiert
+
+
+Potentieller Parallelismus - Wo bieten sich Threads an?
+- Wenn voneinander unabhängige Aufgaben zu erledigen sind
+- Resultat ist unabhängig von Ausführungsreihenfolge der Teilaufgaben
+- Blockender /Überlappender I/O
+- Asynchrone Ereignisse: Netz, Tastatur, Interrupts
+
+
+Konkurrentes Programmieren:
+- Hierzu gehören:
+    - Parallele Ausführung
+    - Synchronisierung
+    - Kommunikation / Datenaustausch
+- Reihenfolge ist potentiell unbekannt / irrelevant
+- Konkurrent kann auch timeshared sein
+- Unter "nacktem" Unix:
+    - Forking:
+        - Elternteil / Kind
+        - Beide haben jeweils eigene PID
+        - Command: fork (Return-Wert ist PID oder 0)
+    - Vorteile: Speicher- und Ressourcenschutz, sehr einfach
+    - Nachteile: Aufwändige Synchronisation, ziemlich unübersichtlich
+- Mit Threads:
+    - Weniger Programmoverhead
+    - Weniger Systemoverhead
+    - Keine Eltern:
+        - Threads sind gleichwertig
+        - Es gibt allerdings noch den "Main-Thread"
+
+
+Synchronisation:
+- Bei seriellen Programmen: Reihenfolge des Codes
+- Bei Unix Multiprocessing: waitpid
+- Bei Pthreads:
+    - pthread_join
+    - Mutexe (mutual exclusion) um "ein Schloss um Ressource zu legen"
+    - Bedingungsvariablen
+    - Weniger Wartezeit, bessere (feinere) Synchronisation
+
+
+Kommunikation / Datenaustausch:
+- Prozesse:
+    - Keine Daten werden zwischen Prozessen geteilt
+    - IPC (inter process communication):
+        - Sockets
+        - Shared Memory
+        - Message Passing
+        -> Jedes Mal OS-Aufruf (teuer!)
+- Threads:
+    - Alle Daten werden zwischen Threads geteilt
+    - Kommunikation über globale Variablen
+    - Fehlerpotential, weil alle Daten geteilt werden -> Deshalb: Mutexe
+
+
+Identität von Threads:
+- Wer bin ich?
+- Identifikation mittels Pthread-Handle
+- Eigene Identität: pthread_self
+- Vergleich mit anderer Identität: pthread_equal
+
+
+Terminierung:
+- Prozess:
+    - Wird am Ende von "main()" beendet
+    - "main_entry" und "main_exit" zu jedem Programm gelinkt. Zuständig für:
+        - Rückgabe von Exit-Wert
+        - Befreiung von Systemressourcen
+- Thread:
+    - Wird am Ende der entsprechenden Funktion beendet
+    - Alternativ: "pthread_exit" oder "pthread_cancel"
+- Exit-Status und Rückgabewert:
+    - Pthread kann joinable oder detached (kein Rückgabewert möglich, da keine Referenz mehr) sein
+    - int pthread_join(pthread_t th, void **thread_return);
+    - Rückgabewert wird geliefert von "pthread_exit" oder von Callback, das "pthread_create" übergeben wurde
+    - Callback: Gibt (void *) zurück -> Typecast machen
+
+
+Bibliotheksaufrufe & Fehler:
+- Pthread Bibliotheksaufrufe geben bei Erfolg Null, ansonsten Fehlercode zurück
+- Fehlercodes sind in errno.h definiert
+    -> Im Code "#include <errno.h>", dann gibts z.B. "EINVAL" (ungültige Argumente)
+- Alternativ: Klartext des Fehlers ausgeben: fprintf(stderr, "Fehler: %s\n", strerror(rtn));
+
+
+
+
+
+
+Stand zusammenfassung: Seite 30
+
+
 
 Thread-Modell
 -----------------------------------------------------------------------------------------------------
+
+Ressourcenaufteilung:
 - Prozesseigene Ressourcen: Globale Daten, Instruktionen (Programm), etc.
 - Threadeigene Ressourcen: Stack, Program Counter, CPU-Register
 
 
-Stand zusammenfassung: Seite 11
+
+Beispiel pthread_create:
+-----------------------------------------------------------------------------------------------------
+extern int pthread_create(
+    pthread_t *thread_handle,
+    const pthread_attr_t *thread_attribute,
+    void * (*)funktion(void *),
+    void *parameter
+);
+
+
+
 
 
 
 TODO:
 - checken, seit wanns threads gibt (in notizen anpassen)
+- rest (thread modell und pthread_create beispiel) noch irgendwo einbauen
+- umbenennen in "gundlagen"
 
 
 
-stand unterricht: Folie 55
+stand unterricht: Folie 70
