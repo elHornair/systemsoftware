@@ -1,45 +1,6 @@
-Programm:
------------------------------------------------------------------------------------------------------
-1. Einführung
-2. Design & Buffering
-3. Synchronisation im Detail
-4. Verwaltung
-5. Pthreads & Unix
-6. Memory Management
-    - Manuelles MM - Heap?
-    - Garbage Collection
-
-
-Geschichte Pthreads:
------------------------------------------------------------------------------------------------------
-- Threads: Seit ~1950
-- Hardware:
-    - Multicore (eher neu)
-    - Core selbst: Parallele Pipelines (schon seit langer Zeit)
-    - Timesharing -> Unix mit Prozessen (~1975)
-    -> Anzahl Cores / Rechner verdoppelt sich ungefähr alle 2 Jahre ("Neues Moore-Law")
-- Anwendungen erste Computer (~1920/1930)
-    - Ballistische Berechnungen
-    - Volkszählungen -> Hier wird Parallelisierung bereits interessant, weil parallelisierbare Aufgabe
-    - Buchungssysteme -> z.B. Fluggesellschaften (Gefahr: 2 buchen gleichzeitig) -> ~1970
-    - Games
-- Daraus entstehende Probleme:
-    - Synchronisation
-    - Parallelismus?
-    - Konkurrenz
-    - Kommunikation
-- Lösung:
-    - Proprietär (jeder löst auf sein Problem spezifisch, eigene Lösung)
-    -> Verschiedene Lösungen, nicht zueinander kompatibel, nicht interoparabel (versch. Libs konnten nicht zusammenarbeiten)
-- 80er-Jahre: Unis / Forschungseinrichtungen befassen sich mit Parallelisierung
-- 90er-Jahre: Unixes (~20 versch. Unix-Systeme)
-- Weil so viele versch. Unix-Systeme: Posix-Standard -> Kompatibles Interface (Standardisierung) (damit Anwendungen plattformübergreifend sein konnten)
-- Unter anderem Teil von Posix: Pthreads
-
-
 Pthreads (highlevel)
 -----------------------------------------------------------------------------------------------------
-- Einfach zu benutzen (im historischen Kontext, heute eher schwierig)
+- Einfach zu benutzen (im historischen Kontext, heute im Verhältnis eher schwierig)
 - Lightweight (stimmt auch heute noch)
 - Portabel (stimmt auch heute noch, abgesehen von Windows -> Dafür gibts aber weitere Abstraktion: ApacheRuntime)
 - Java-Syntaktisch
@@ -67,30 +28,9 @@ Threads - Co-Routinen
 - Datenbuffer
 
 
-Warum Threads?
------------------------------------------------------------------------------------------------------
-- Geschichte:
-    - "langsame" Computer -> serielles Arbeiten
-    - Multiuser Timesharing -> Mehrere Benutzer arbeiten am gleichen System (wechseln sich ab)
-    - CPUs wurden immer schneller und konnten nicht mehr voll ausgelastet werden -> mehrere Prozesse teilen sich einen Core
-    - Heute werden CPUs kaum mehr schneller -> mehr CPUs
-    -> Warum Threads? Rechenzeit soll besser ausgenutzt werden
-- Problem: GUI friert ein
-    - Während Wartezeit soll GUI nicht einfrieren (GUI braucht aber auch Rechenzeit, um Update zu machen -> z.B. Progres-Bar)
-    -> Warum Threads? User-Feedback
-- Threads sind effizienter als Prozess-Forking
-
 
 Thread-Modell
 -----------------------------------------------------------------------------------------------------
-- Prozesseigene Ressourcen (von allen Threads geteilt)
-    - Globale Daten
-    - Programmcode
-- Thread:
-    - Stack
-    - Program Counter / SP (CPU-Register)
-
-
 Speicheraufteilung:
 - Stack mit stack frames (lokale Variablen, Rücksprungadresse, ...)
 - Globale Daten

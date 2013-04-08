@@ -1,0 +1,61 @@
+Einführung
+-----------------------------------------------------------------------------------------------------
+
+Beispiele von Parallelismus in Hardware:
+- CPU-Pipelines
+- SMP / Multicore
+
+Geschichte Multithreading:
+- Threads: Seit ~1950 (Notizen, Folien sagen ca. 25 Jahre)
+- Anfänge:
+    - Ballistische Berechnunge
+    - Echtzeit-Systeme (realtime systems)
+    - Buchungssysteme
+    - Games
+- Timesharing -> Unix mit Prozessen (~1975)
+- Am Anfang selbstgemacht
+- Dann proprietäre Bibliotheken. Probleme damit:
+    - Verschiedene Style
+    - Inkompatible Interfaces
+    - Keine Interoperabilität / Portabilität
+- 80er: Forschungsgegenstand in OS-Forschung
+- 90er: Verschiedene Bibliotheken
+- 1996: IEEE Posix-Standard inkl. Pthreads-Standard (leichtgewichtig, portabel, einfach zu benutzen)
+- Eher neu: Multicore
+
+
+Grundlagen Threads
+-----------------------------------------------------------------------------------------------------
+
+Warum Threads?
+- Anfangs nur langsame Computer -> Serielles Arbeiten sinnvoll
+- Später: Multiuser Timesharing (Mehrere Benutzer arbeiten am gleichen System)
+- CPUs wurden immer schneller und konnten nicht mehr voll ausgelastet werden -> mehrere Prozesse teilen sich einen Core
+- Deshalb: Multitasking
+- Heutige Computer: Gleichzeitig viele verschiedene Aufgaben
+- Threads weil:
+    - Bessere Antwortzeiten (fühlt sich besser an -> Kein eingefrohrenen GUI währen Rechenprozess)
+    - Bessere Ressourcenausnutzung
+    - Früher hat man das mit process forking erreicht, ist aber mit einem gewissen Aufwand verbunden
+    - Threads sind effizienter als Prozess-Forking -> Man will Rechenzeit besser ausnutzen
+- Threads werden auch LWP (leight weight process) genannt
+- Heute werden CPUs kaum mehr schneller -> Deshalb mehr CPUs (Anzahl Cores / Rechner verdoppelt sich ungefähr alle 2 Jahre ("Neues Moore-Law"))
+
+
+
+Thread-Modell
+-----------------------------------------------------------------------------------------------------
+- Prozesseigene Ressourcen: Globale Daten, Instruktionen (Programm), etc.
+- Threadeigene Ressourcen: Stack, Program Counter, CPU-Register
+
+
+Stand zusammenfassung: Seite 11
+
+
+
+TODO:
+- checken, seit wanns threads gibt (in notizen anpassen)
+
+
+
+stand unterricht: Folie 55
