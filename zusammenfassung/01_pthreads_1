@@ -48,11 +48,29 @@ Was sind Threads?
 - Pthread definiert Thread durch Funktion, die Start und Ende des Threads definiert
 
 
+Ressourcenaufteilung Thread:
+- Prozesseigene Ressourcen: Globale Daten, Instruktionen (Programm), etc.
+- Threadeigene Ressourcen: Stack, Program Counter, CPU-Register
+
+
 Potentieller Parallelismus - Wo bieten sich Threads an?
-- Wenn voneinander unabhängige Aufgaben zu erledigen sind
-- Resultat ist unabhängig von Ausführungsreihenfolge der Teilaufgaben
-- Blockender /Überlappender I/O
-- Asynchrone Ereignisse: Netz, Tastatur, Interrupts
+- Unabhängige Aufgaben:
+    - Unterschiedliche Ressourcen
+    - Resultat ist unabhängig von Ausführungsreihenfolge der Teilaufgaben
+    -> Je mehr Abhängigkeiten, um so mehr geblockte Tasks, die aufeinander warten
+- Blockierender / Überlappender I/O:
+    - Blockierung: Typisch für I/O
+    - Währenddessen andere Aufgabe ausführbar?
+    -> I/O-Aufgabe wird von Thread ausgeführt
+- Starke CPU-Beanspruchung:
+    - z.B: kryptografische Funktionen, Matrizen, Kompression
+    - Parallel durchführen, Programm kann mit anderem Thread trotzdem noch auf I/O reagieren
+- Asynchrone Ereignisse:
+    - z.B: Netzwerk, User-I/O (Tastatur, Maus, ...), Hardware-Interrupts
+    - Zufällige Intervalle zwischen Daten I/O
+    -> Behandlungsroutinen können in einen Thread gekapselt werden
+- Realtime-Scheduling:
+    - Unterschiedliche Prioritäten der Aufgaben
 
 
 Konkurrentes Programmieren:
@@ -131,20 +149,87 @@ Bibliotheksaufrufe & Fehler:
 - Alternativ: Klartext des Fehlers ausgeben: fprintf(stderr, "Fehler: %s\n", strerror(rtn));
 
 
+Threads vs. Prozesse:
+- Prozesse teuerer (Setupzeit, Speicherverbrauch, IPC, Kontextswitches)
+- Threads einfacher
+- Grosser Teil kann in Userspace erledigt werden (pthreads Bibliothek, Kommunikation, Synchronisation)
 
 
+Beispiele für Multithreaded Applikationen:
+- Server: DB, Fileserver, HTTP, P2P, ...
+- Komplexes Rechnen
+- Multitasking-Apps
 
 
-Stand zusammenfassung: Seite 30
-
-
-
-Thread-Modell
+Modelle
 -----------------------------------------------------------------------------------------------------
+- Richtiges Modell zu finden ist nicht immer offensichtlich -> Trial & Error, iterative Verbesserungen
+- Modelle unterscheiden sich durch Art der Kommunikation / Art der Arbeitsaufteilung
 
-Ressourcenaufteilung:
-- Prozesseigene Ressourcen: Globale Daten, Instruktionen (Programm), etc.
-- Threadeigene Ressourcen: Stack, Program Counter, CPU-Register
+
+Boss / Worker Modell:
+- Auch Boss / Slave
+- Boss-Thread für Aufgabenverteilung verantwortlich
+- Worker-Threads für Ausführung verantwortlich
+- Boss wartet evtl. auf Erledigung
+- Worker-Threads werden "on demand" erstellt
+- Code-Beispiel: S.41
+- Alternative: Thread-Pools:
+    - Definierte Menge von Threads von Anfang an in Pool bereit
+    - Arbeitspakete in FIFO, werden nach und nach Threads aus Pool zugeteilt
+    - Weniger Overhead mit Erstellen, mehr mit Verwalten
+    - Code-Beispiel: S.43
+- Anwendungsbereich: Gut geeignet für Server:
+    - Asynchrone Anfragen/Ereignisse: Boss
+    - Erledigung: Worker
+- Kommunikation zwischen Boss und Worker minimieren
+- Abhängigkeit zwischen Workern minimieren
+
+
+Peer Modell:
+- Auch Workcrew
+- Kein Chef
+- Gleichzeitiges Erledigen der Arbeiten
+- Ein Thread muss alle anderen erstellen
+- Peers kennen Input im Voraus (Zuständigkeit) und haben eigenen Weg um Input zu bekommen
+- Peers teilen Input miteinander
+- Code-Beispiel: S.47
+- Anwendungsbereich:
+    - Fest oder gut definierte Menge von Eingaben
+    - Voneinander unabhängige Aufgaben mit wenig Koordination
+    - z.B: Matrix-Operationen, Primzahlengenerator, Simulationen
+- Da kein Boss, muss Zugang zu I/O synchronisiert sein
+- Bei viel Synchronisation: Blockaden (langsam) -> Geteilte Ressourcen minimieren
+
+
+Pipeline Modell:
+- Input-Strom
+- Suboperationen (Filter, Etapen), Einheiten mit eigenem Input
+- 1. Thread erhält Input, bearbeitet, gibt Resultat weiter, ..., letzter Thread stellt Output bereit
+- Anwendungsbereich / Beispiel:
+    - Fliessband in Autofabrik
+    - RISC CPU: Operation holen, decodieren, berechnen, speichern
+    - Bildverarbeitung, Signalverarbeitung, Textverarbeitung (Unix Pipes), Filtering
+- Wenn Etapen unabhängig -> Parallele Ausführung der Etapen
+- Code-Beispiel: S.51
+
+
+Kombination von Modellen:
+- Bei Bedarf Kombination sinnvoll
+- Pipeline:
+    - Ganzes Programm nur so schnell wie langsamste Stufe
+    -> Einzelne (langsame) Stufe parallelisieren
+    -> Wichtig, dass alle Stufen etwa gleich lang benötigen (Ausbalancierung)
+- Bei Peer Modell können einzelne Peers Pipelines verwenden
+- ...
+
+
+
+
+
+Stand: S.52/53
+
+
 
 
 
@@ -164,8 +249,10 @@ extern int pthread_create(
 
 TODO:
 - checken, seit wanns threads gibt (in notizen anpassen)
-- rest (thread modell und pthread_create beispiel) noch irgendwo einbauen
+- rest (pthread_create beispiel) noch irgendwo einbauen
 - umbenennen in "gundlagen"
+- notes aus schule mergen
+- Stand Unterricht? S. xx?
 
 
 
