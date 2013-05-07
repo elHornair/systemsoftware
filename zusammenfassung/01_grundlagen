@@ -51,6 +51,12 @@ Was sind Threads?
 Ressourcenaufteilung Thread:
 - Prozesseigene Ressourcen: Globale Daten, Instruktionen (Programm), etc.
 - Threadeigene Ressourcen: Stack, Program Counter, CPU-Register
+- Speicheraufteilung Thread:
+    - Stack mit stack frames (lokale Variablen, Rücksprungadresse, ...)
+    - Globale Daten
+    - Code (program counter zeigt irgendwo hierauf)
+    - Heap
+    -> Stack baut sich auf (mit jedem Verschachtelungslevel)
 
 
 Potentieller Parallelismus - Wo bieten sich Threads an?
@@ -159,3 +165,17 @@ Beispiele für Multithreaded Applikationen:
 - Server: DB, Fileserver, HTTP, P2P, ...
 - Komplexes Rechnen
 - Multitasking-Apps
+
+
+Pthreads (highlevel)
+-----------------------------------------------------------------------------------------------------
+- Einfach zu benutzen (im historischen Kontext, heute im Verhältnis eher schwierig)
+- Lightweight (stimmt auch heute noch)
+- Portabel (stimmt auch heute noch, abgesehen von Windows -> Dafür gibts aber weitere Abstraktion: ApacheRuntime)
+- Java-Syntaktisch
+- Anwendungen:
+    - Ada, Concurrent Pascal
+    - Closure, Erlang
+        - Warum gibts Closure / Erlang?
+        - Um einfach parallele Programme schreiben zu können
+        - Aber anderer Lösungsansatz: In Closure/Erlang gibts keinen shared state
