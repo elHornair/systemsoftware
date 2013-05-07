@@ -61,36 +61,55 @@ Kombination von Modellen:
 - ...
 
 
-
-
-
-Stand: S.52/53
-
-
-
-
-
-Beispiel pthread_create:
+Datenbuffering zwischen Threads
 -----------------------------------------------------------------------------------------------------
-extern int pthread_create(
-    pthread_t *thread_handle,
-    const pthread_attr_t *thread_attribute,
-    void * (*)funktion(void *),
-    void *parameter
-);
+- Ziel: Austausch von Daten zwischen Threads
+- Verschiedene Modelle
+- Mechanismen: Lock, suspend/resume-Mechanismus
+- Aufbau: Producer -> Buffer -> Consumer
+- Producer:
+    1. Buffer locken
+    2. In Buffer schreiben
+    3. Buffer unlocken
+    4. Notifikation an wartende Konsumenten
+- Consumer:
+    1. Buffer locken
+    2. So lange warten, bis Buffer nicht leer ist (dazwischen immer wieder unlocken!)
+    3. Daten aus Buffer lesen
+    4. Buffer unlocken
 
 
+Double Buffering:
+- Wenn Threads miteinander Daten tauschen müssen (z.B. bei Peer-Modell)
+- Beide Threads sowohl Producer, als auch Consumer
 
 
+Probleme:
+- Anfällig für Bugs -> Konzentration, Geduld
+- Probleme meist im Management von geteilten Ressourcen:
+    - Locks
+    - Race Conditions
+    - Deadlocks
+    - Ressource Starvation
+- Lösungsansatz:
+    - Lock vor Zugriff auf geteilte Ressourcen
+    - Unlock, sobald Ressource nicht mehr verwendet wird
+    -> Nicht so einfach, wenn Locks dynamisch erstellt werden müssen
+- Charakteristisch für Multithreading-Fehlern:
+    - Nicht korrekte Resultate
+    - Datenkorruption
+    - Schwierig zu reproduzieren (100x OK, 1x falsch)
+    - Teil des Programmes steht:
+        - Warten auf Lock, der nicht lossgelassen wird
+        - warten auf Bedingung, die nie erreicht wird
 
 
-TODO:
-- checken, seit wanns threads gibt (in notizen anpassen)
-- rest (pthread_create beispiel) noch irgendwo einbauen
-- umbenennen in "gundlagen"
-- notes aus schule mergen
-- Stand Unterricht? S. xx?
+Beispiele für MultiThreaded Applikationen:
+- Bankomat:
+    - Es kann gleichzeitig Geld abgehoben und im Hintergrund Statistik erstellt werden
+    - Locking eines Kontos während geschrieben wird
+    - Modell: Boss-Worker
+- Matrizenmultiplikation:
+    - Modell: Peer-Modell
+    - Aufteilung in Teilprobleme, parallele Berechnung, am Schluss wieder zusammenfügen
 
-
-
-stand unterricht: Folie 91
