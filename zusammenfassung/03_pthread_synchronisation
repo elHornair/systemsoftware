@@ -1,0 +1,36 @@
+Pthread Synchronisation
+-----------------------------------------------------------------------------------------------------
+- Beispiel Bankomat: Geld holen / einzahlen -> Atomare Operationen (entweder / oder -> Isoliert von anderen Operationen)
+
+
+Synchronizationswerkzeuge:
+- ...
+
+
+Stand: S.73
+
+
+
+
+Beispiel pthread_create:
+-----------------------------------------------------------------------------------------------------
+extern int pthread_create(
+    pthread_t *thread_handle,
+    const pthread_attr_t *thread_attribute,
+    void * (*)funktion(void *),
+    void *parameter
+);
+
+
+
+
+
+
+TODO:
+- checken, seit wanns threads gibt (in notizen anpassen)
+- rest (pthread_create beispiel) noch irgendwo einbauen
+- notes aus schule mergen
+
+
+
+stand unterricht: Folie 91
