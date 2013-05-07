@@ -1,0 +1,96 @@
+Modelle
+-----------------------------------------------------------------------------------------------------
+- Richtiges Modell zu finden ist nicht immer offensichtlich -> Trial & Error, iterative Verbesserungen
+- Modelle unterscheiden sich durch Art der Kommunikation / Art der Arbeitsaufteilung
+
+
+Boss / Worker Modell:
+- Auch Boss / Slave
+- Boss-Thread für Aufgabenverteilung verantwortlich
+- Worker-Threads für Ausführung verantwortlich
+- Boss wartet evtl. auf Erledigung
+- Worker-Threads werden "on demand" erstellt
+- Code-Beispiel: S.41
+- Alternative: Thread-Pools:
+    - Definierte Menge von Threads von Anfang an in Pool bereit
+    - Arbeitspakete in FIFO, werden nach und nach Threads aus Pool zugeteilt
+    - Weniger Overhead mit Erstellen, mehr mit Verwalten
+    - Code-Beispiel: S.43
+- Anwendungsbereich: Gut geeignet für Server:
+    - Asynchrone Anfragen/Ereignisse: Boss
+    - Erledigung: Worker
+- Kommunikation zwischen Boss und Worker minimieren
+- Abhängigkeit zwischen Workern minimieren
+
+
+Peer Modell:
+- Auch Workcrew
+- Kein Chef
+- Gleichzeitiges Erledigen der Arbeiten
+- Ein Thread muss alle anderen erstellen
+- Peers kennen Input im Voraus (Zuständigkeit) und haben eigenen Weg um Input zu bekommen
+- Peers teilen Input miteinander
+- Code-Beispiel: S.47
+- Anwendungsbereich:
+    - Fest oder gut definierte Menge von Eingaben
+    - Voneinander unabhängige Aufgaben mit wenig Koordination
+    - z.B: Matrix-Operationen, Primzahlengenerator, Simulationen
+- Da kein Boss, muss Zugang zu I/O synchronisiert sein
+- Bei viel Synchronisation: Blockaden (langsam) -> Geteilte Ressourcen minimieren
+
+
+Pipeline Modell:
+- Input-Strom
+- Suboperationen (Filter, Etapen), Einheiten mit eigenem Input
+- 1. Thread erhält Input, bearbeitet, gibt Resultat weiter, ..., letzter Thread stellt Output bereit
+- Anwendungsbereich / Beispiel:
+    - Fliessband in Autofabrik
+    - RISC CPU: Operation holen, decodieren, berechnen, speichern
+    - Bildverarbeitung, Signalverarbeitung, Textverarbeitung (Unix Pipes), Filtering
+- Wenn Etapen unabhängig -> Parallele Ausführung der Etapen
+- Code-Beispiel: S.51
+
+
+Kombination von Modellen:
+- Bei Bedarf Kombination sinnvoll
+- Pipeline:
+    - Ganzes Programm nur so schnell wie langsamste Stufe
+    -> Einzelne (langsame) Stufe parallelisieren
+    -> Wichtig, dass alle Stufen etwa gleich lang benötigen (Ausbalancierung)
+- Bei Peer Modell können einzelne Peers Pipelines verwenden
+- ...
+
+
+
+
+
+Stand: S.52/53
+
+
+
+
+
+Beispiel pthread_create:
+-----------------------------------------------------------------------------------------------------
+extern int pthread_create(
+    pthread_t *thread_handle,
+    const pthread_attr_t *thread_attribute,
+    void * (*)funktion(void *),
+    void *parameter
+);
+
+
+
+
+
+
+TODO:
+- checken, seit wanns threads gibt (in notizen anpassen)
+- rest (pthread_create beispiel) noch irgendwo einbauen
+- umbenennen in "gundlagen"
+- notes aus schule mergen
+- Stand Unterricht? S. xx?
+
+
+
+stand unterricht: Folie 91
