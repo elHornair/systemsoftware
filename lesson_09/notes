@@ -1,0 +1,77 @@
+- Am 13. Mai 2013
+
+
+- S.90-92 übersprungen
+
+S. 93: Anz. Threads limitieren:
+- Problem: Funktion, mit x: Durchsatz und y: Anz. Threads hat Scheitelpunkt
+-> Zusätzliche Threads werden immer teuer
+
+
+Threadpool:
+- Pool mit bereiten Threads
+- Wenn Thread gebraucht wird: Einen nehmen -> Danach wieder zurücklegen
+- Wenn Pool leer ist: Warten -> Nicht Polling machen, Bedingungsvariablen benutzen
+-> Könnte man auch für Projekt benutzen (zur Threadverwaltung)
+
+-> Sprung bis S.101
+
+
+Thread Attribute:
+    - Attribute übergeben: pthread_create(&thr, attr);
+    - Detached Status:
+        - Wie bei Unix: Mit & - z.B. "doStuff&"
+    - Thread Stack-Grösse und -platzierung
+        - pthread_attr_setstacksize -> Details: S.105
+    -> Thread Stack angeschaut
+    -> Rest überflogen bis S. 110
+
+
+
+-> S.111: pthread_once angeschaut
+    - Um Code genau einmal auszuführen (z.B. mit DB connecten; danach nur noch schreiben) -> Synchronisationswerkzeug (wie z.B. Mutex)
+    - Alternativ könnte man mit tryLock arbeiten (ist aber Missbrauch und auch nicht so aussagekräftig wie pthread_once)
+    -> Überflogen bis S.116
+
+
+Keys:
+- Hält Threadspezifische Daten (Pointer)
+- Problem:
+    - Mehrere Threads mit je einer Connection zu einer DB
+    - Wir verwalten Array, das sagt, welche Connection zu welchem Thread gehört
+    - Library soll uns Mgmnt von DB-Connections abnehmen; wir wollen nicht jedesmal, wenn wir read_from_db aufrufen die connection übergeben
+    - Wir wollen Eintrag aus Array löschen, sobald Thread tot ist (zu ihm gehörende Daten löschen)
+    -> Problem: Wie wissen wir, wann Thread tot ist?
+    -> Lösung: Keys
+-> Alles global (siehe S.121-123)
+
+
+S.125 - Cancellation:
+- Wenn bestimmte Aufgabe gelöst wurde (z.B. bei Google: Resultat gefunden), können (auch) die anderen Threads gekillt werden
+- Thread entscheidet selbst, ob und wo (cancel points) er cancelbar ist
+-> Nachteil: Kann sehr schnell sehr komplex werden (siehe Bsp. S.130/131)
+-> Ziemlich schnell durchgegangen bis S.131
+
+
+Sprung auf S.184:
+-> Lesson learned: Mutexe können teuer sein, wegen Cache-Synchronisation (v.a. bei sehr granularen Programmen)
+
+
+Sprung auf S.132: Scheduling von Pthreads
+- Wenn Prozess geblockt, sind alle Threads des Prozesses geblockt (green threads)
+- OS kann auch mit Scheduling von Threads beauftragt werden (red threads)
+
+
+Priority Inversion:
+- Hochpriorisierter Thread läuft
+- Irgendwann kommt tiefpriorisierter Thread dran und lockt Ressource A
+- Dann kommt hochpriorisierter Thread wieder dran, kann aber nicht auf Ressource A zugreifen
+- Hochpriorisierter Thread muss lange warten, weil tiefpriorisierter lange Zeit nicht drankommt, um Unlock zu machen
+- Lösung:
+    -> Ansatz A: Prio an Mutex geben -> Wer Mutex lockt, hat höhere Prio (Prio-Ceiling)
+    -> Ansatz B: Prio-Vererbung
+-> Durchgerattert bis S.151
+
+
+-> Die nächsten zwei mal gibts MemoryManagement
+
