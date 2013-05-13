@@ -1,13 +1,154 @@
 Pthread Synchronisation
 -----------------------------------------------------------------------------------------------------
-- Beispiel Bankomat: Geld holen / einzahlen -> Atomare Operationen (entweder / oder -> Isoliert von anderen Operationen)
+- Beispiel Bankomat:
+    - Geld holen / einzahlen
+    -> Atomare Operationen (entweder / oder -> Isoliert von anderen Operationen)
 
 
 Synchronizationswerkzeuge:
+- pthread_join
+- Mutexe
+- Bedingungsvariablen:
+    - Warten auf Ereignis / Signalisation (warten auf Erfüllung von Bedingung)
+    - Parameter in Struktur
+- pthread_once: Für einmalige Ausführung
+- Komplexere Werkzeuge:
+    - Reader / Writer Exclusion
+    - Monitore, Thread-sichere Datenstrukturen / Objekte
+    - Semaphoren / Mutexe mit Zählern
+
+
+Mutex-Variablen:
+- Ziele:
+    - Gemeinsame Daten schützen
+    - Exklusiven Zugang zu Ressourcen bieten
+- Für CS (Critical Sections):
+    - Kritische Code-Bereiche
+    - Länge der CS: Beliebig lange, mindestens eine Maschinenanweisung
+    - Beispiel Assembler: tsl rx, lock (Test Set Lock)
+- Mutexen wachen in zufälliger Reihenfolge auf
+- Endliche Wartezeit ist garantiert
+- Vorgehen:
+    - Jede Ressource einzeln schützen
+    - Mutex definieren
+    - Lock / Unlock bei Zugriff
+- Korrekter Code:
+    - Keine Änderung während Lese-/Schreibzugriff
+    - Exklusiver, alleiniger Zugriff
+- Initialisierung:
+    - Statisch:
+        - pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    - Dynamisch:
+        - pthread_mutex_t* lock_p;
+        - lock_p = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+        - pthread_mutex_init(lock_p, NULL);
+                                       ^-- pthread_mutexattr_t
+- Initialisierung in main(), oder in Bibliothek (pthread_once(...))
+- Manipulation von Mutexen:
+    - pthread_mutex_init
+    - pthread_mutex_lock
+    - pthread_mutex_unlock
+    - pthread_mutex_timedlock
+    - pthread_mutex_trylock
+- Rekursive Locks: Kann durch setzen von Lock Attributen erreicht werden (PTHREAD_MUTEX_RECURSIVE)
+- Fehlererkennung:
+    - Anhand von Rückgabewerten
+    - Achtung: Viele Fehler sind nicht standardisiert
+    - pthread_mutex_init kann z.B. zurückgeben:
+        - EAGAIN
+        - ENOMEM
+    - Fehlbenutzung von Mutexes muss nicht zwingend erkannt werden:
+        - Locken von nicht initialisiertem Mutex
+        - Locken von Mutex, den man schon besitzt
+        - Unlock von Mutex, den man nicht hat
+        - ...
+- pthread_mutex_trylock:
+    - Benutzung weist auf potentielles Designproblem hin
+    - Entgegen der Philosophie von mutithr. Design:
+        - Sobald Ressource verwendet werden soll, entweder blockieren (warten) oder Ressource benutzen
+        - pthread_mutex_trylock blockiert nicht - Multithreading ist effizient WEIL es blockiert
+    - Bessere Lösung: Neuer Thread, der andere Arbeit erledigt, während man wartet
+        - Einfacher zu verstehen: Kein if/else-Code für Zustandsverwaltung
+        - Arbeit in Funktion gekapselt
+    - Mögliche Verwendung von pthread_mutex_trylock:
+        - Polling für Zustandsänderung:
+            - Ist Ressource jetzt frei? Und jetzt? Und jetzt?
+            -> Overhead
+            - Kann zu Ressource Starvation führen
+        - Deadlocks in komplexen Lock Hierarchien vermeiden (Achtung Konsistenz!)
+        - Priority Inversion
+- Alternativen:
+    - Ressourcen aufteilen
+        - Ereignis-Synchronization:
+            - Barrieren
+            - An gewissen Punkten Ergebnisse austauschen
+            - Für Synchronization:
+                - a) Bedingungsvariablen verwenden
+                - b) Zähler, um festzustellen, ob alle schon die Barriere erreicht haben
+        - Nachteile:
+	        - Ressourcen überprüfen ist nicht möglich -> Ausschluss von anderen Threads
+            - Reader/Writer-Lock ist so nicht möglich
+            - Rekursive Locks sind so nicht möglich
+    - Lock-Contention (Streit, Zank):
+        - Wenn mehrere Threads versuchen zuzugreifen: Höchste Priorität bekommt Lock
+        - Problem: Priority Inversion
+        - Lösung: weniger gemeinsame Ressourcen zwischen Threads verschiedener Prioritäten
+
+
+Lock-Granularität:
+- Ziele und Anforderung an Synchronization (Komplexe Datenstrukturen und Lock-Granularität):
+    - Keine Race-Conditions
+    - Keine Deadlocks
+    - So wenig Leistungsverlust wie möglich
+        -> Kritische Sektionen so kurz machen, wie möglich
+        -> Keine globalen Locks
+- Zugriffsmuster und Granularität:
+    - Read/write bei Listen -> individuelle Locks
+    - Insert -> Globaler Lock oder kompliziertere Struktur
+    - Fein strukturierte Lock Granularität (im Vergleich zu grob):
+        - Mehr Programmieraufwand
+        - Mehr Verwaltungsaufwand
+        - Mehr Daten
+        - Bessere Parallelität
+
+
+Lock-Hierarchien:
+- Beispiel:
+    - Level 1:
+        - A lockt B und C
+    - Level 2:
+        - B lockt D und E
+        - C lockt F und G
+    - Level 3:
+        - D lockt H
+        - ...
+- "Deadly embrace" möglich:
+    - Locking Hierarchie
+    - Gleiche Lock-Reihenfolge
+- Support für Lock Hierarchien selbst basteln
+
+
+Mutexe und Prozesse:
+- Default: Mutex nur in Prozess sichtbar
+- Möglichkeit, Mutex zu definieren, der für mehrere Prozesse gültig ist:
+    - Wenn _POSIX_THREAD_PROCESS_SHARED definiert
+    - #include <unistd.h> nötig, damit _POSIX Konstanten bekannt sind
+    - Code:
+    - pthread_mutexattr_t
+    - pthread_mutexattr_init(pthread_mutexattr_t* ma)
+    - pthread_mutexattr_destroy
+    - pthread_mutexattr_setshared(&ma, PTHREAD_PROCESS_SHARED)
+- Mutex befindet sich dann im "shared memory"
+
+
+Bedingungsvariablen:
 - ...
 
 
-Stand: S.73
+
+
+
+Stand: S.87
 
 
 
