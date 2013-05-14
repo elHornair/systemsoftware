@@ -7,6 +7,7 @@ Modelle
 Boss / Worker Modell:
 - Auch Boss / Slave
 - Boss-Thread für Aufgabenverteilung verantwortlich
+- Boss soll möglichst wenig Arbeit machen (damit er nicht die Worker blockieren kann)
 - Worker-Threads für Ausführung verantwortlich
 - Boss wartet evtl. auf Erledigung
 - Worker-Threads werden "on demand" erstellt
@@ -16,39 +17,64 @@ Boss / Worker Modell:
     - Arbeitspakete in FIFO, werden nach und nach Threads aus Pool zugeteilt
     - Weniger Overhead mit Erstellen, mehr mit Verwalten
     - Code-Beispiel: S.43
-- Anwendungsbereich: Gut geeignet für Server:
+- Anwendungsbereich: Gut geeignet für Server
     - Asynchrone Anfragen/Ereignisse: Boss
     - Erledigung: Worker
+    - Z.B. ein Load-Balancer
 - Kommunikation zwischen Boss und Worker minimieren
 - Abhängigkeit zwischen Workern minimieren
+- Beispielcode:
+    main {// boss
+        for (;;)// unendlicher Loop
+        hole aufgabe
+        switch aufgabe
+            case X: pthread_create task_X// worker 1
+            case Y: pthread_create task_Y// worker 2
+            ...
+    }
+- Verbesserung: Thread-Pools
+    - Definierte Menge von Threads schon im Voraus erstellen
+    - Weniger Overhead mit Threads erstellen, dafür etwas mehr mit Threads verwalten
+    -> FIFO
 
 
 Peer Modell:
 - Auch Workcrew
 - Kein Chef
 - Gleichzeitiges Erledigen der Arbeiten
-- Ein Thread muss alle anderen erstellen
+- Ein Thread muss alle anderen erstellen, restliche Threads sind voneinander unabhängig
 - Peers kennen Input im Voraus (Zuständigkeit) und haben eigenen Weg um Input zu bekommen
 - Peers teilen Input miteinander
 - Code-Beispiel: S.47
 - Anwendungsbereich:
     - Fest oder gut definierte Menge von Eingaben
     - Voneinander unabhängige Aufgaben mit wenig Koordination
+    - Möglichst wenig geteilte Ressourcen -> Damit Peers nicht zu oft synchronisiert werden müssen
     - z.B: Matrix-Operationen, Primzahlengenerator, Simulationen
 - Da kein Boss, muss Zugang zu I/O synchronisiert sein
 - Bei viel Synchronisation: Blockaden (langsam) -> Geteilte Ressourcen minimieren
 
 
 Pipeline Modell:
-- Input-Strom
+- Input-Strom, mit jedem Paket müssen einige Schritte durchgeführt werden
 - Suboperationen (Filter, Etapen), Einheiten mit eigenem Input
+- 1 Thread pro Arbeitsschritt
 - 1. Thread erhält Input, bearbeitet, gibt Resultat weiter, ..., letzter Thread stellt Output bereit
+- Während Thread 2, das 1. Paket verarbeitet, arbeitet Thread 1 schon am 2. Paket. Thread 3 tut zu diesem Zeitpunkt noch nichts
 - Anwendungsbereich / Beispiel:
     - Fliessband in Autofabrik
     - RISC CPU: Operation holen, decodieren, berechnen, speichern
-    - Bildverarbeitung, Signalverarbeitung, Textverarbeitung (Unix Pipes), Filtering
-- Wenn Etapen unabhängig -> Parallele Ausführung der Etapen
-- Code-Beispiel: S.51
+    - Bildverarbeitung, Signalverarbeitung, Textverarbeitung (Unix Pipes), Filtering (Kriterium 1 -> Kriterium 2 -> ...)
+    - Kommunikation zwischen Threads: Message-Passing (so funktioniert Erlang, Haskell, ...)
+- Wenn Etappen voneinander unabhängig -> Parallele Ausführung der Etappen
+
+
+- Vorteile:
+    - Ist schneller für viele Daten
+- Nachteile:
+    - Dauert länger für einzelnes Datum
+    - System ist so langsam, wie schwächstes Glied -> Lösung: Z.B. mehrere von diesen haben
+- Code-Beispiel: Slide 51
 
 
 Kombination von Modellen:

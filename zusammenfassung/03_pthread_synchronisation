@@ -1,8 +1,19 @@
 Pthread Synchronisation
 -----------------------------------------------------------------------------------------------------
-- Beispiel Bankomat:
+Allgemein:
+- Problem am Beispiel Bankomat:
     - Geld holen / einzahlen
-    -> Atomare Operationen (entweder / oder -> Isoliert von anderen Operationen)
+    -> Atomare Operationen (entweder / oder -> Isoliert von anderen Operationen; nicht nur halb machen)
+- Bei seriellen Programmen:
+    - Nicht nötig, weil durch Reihenfolge des Codes gegeben
+- Bei Multiprozessorsystene:
+    - Prozesse müssen evtl aufeinander warten (Abhängigkeiten)
+    - Unix:
+        - myPid = fork()
+        - waitpid(myPid)
+    - In Thread-Welt:
+        - pthread_join(...) (analog zu waitpid)
+        - Mutexe
 
 
 Synchronizationswerkzeuge:
@@ -19,14 +30,20 @@ Synchronizationswerkzeuge:
 
 
 Mutex-Variablen:
+- Mutual Exclusion (gegenseitiges Ausschliessen -> Nur einer darf gleichzeitig zugreifen)
 - Ziele:
     - Gemeinsame Daten schützen
     - Exklusiven Zugang zu Ressourcen bieten
+- Da Heap von den Threads eines Prozesses geteilt wird (z.B. globale Variablen):
+    -> Sichergestellen, dass sie sich nicht in die Quere kommen
+- Ressource wird durch Mutex geschützt
+- Mutex: Schloss, das gefragt werden muss, ob auf Ressource zugegriffen werden dar
+- pthread_mutex_lock / pthread_mutex_unlock -> Alles zwischen lock und unlock wird garantiert nacheinander ausgeführt (atomare Einheit) 
 - Für CS (Critical Sections):
     - Kritische Code-Bereiche
     - Länge der CS: Beliebig lange, mindestens eine Maschinenanweisung
     - Beispiel Assembler: tsl rx, lock (Test Set Lock)
-- Mutexen wachen in zufälliger Reihenfolge auf
+- Mutexe wachen in zufälliger Reihenfolge auf
 - Endliche Wartezeit ist garantiert
 - Vorgehen:
     - Jede Ressource einzeln schützen

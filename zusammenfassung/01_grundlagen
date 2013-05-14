@@ -146,7 +146,8 @@ Kommunikation / Datenaustausch:
 - Threads:
     - Alle Daten werden zwischen Threads geteilt
     - Kommunikation über globale Variablen
-    - Fehlerpotential, weil alle Daten geteilt werden -> Deshalb: Mutexe
+    - Fehlerpotential, weil alle Daten geteilt werden
+        -> Deshalb: Mutexe (Mutex Kommunikation ist nicht so teuer, sehr einfach)
 
 
 Identität von Threads:
@@ -158,25 +159,30 @@ Identität von Threads:
 
 Terminierung:
 - Prozess:
-    - Wird am Ende von "main()" beendet
+    - Wird am Ende von "main()" beendet -> Betriebssystemaufruf exit()
     - "main_entry" und "main_exit" zu jedem Programm gelinkt. Zuständig für:
         - Rückgabe von Exit-Wert
         - Befreiung von Systemressourcen
 - Thread:
-    - Wird am Ende der entsprechenden Funktion beendet
+    - Wird am Ende der entsprechenden Funktion automatisch beendet
     - Alternativ: "pthread_exit" oder "pthread_cancel"
 - Exit-Status und Rückgabewert:
     - Pthread kann joinable oder detached (kein Rückgabewert möglich, da keine Referenz mehr) sein
-    - int pthread_join(pthread_t th, void **thread_return);
+    - int pthread_join(pthread_t th, void **thread_return) -> nur für joinable Pthread möglich
     - Rückgabewert wird geliefert von "pthread_exit" oder von Callback, das "pthread_create" übergeben wurde
     - Callback: Gibt (void *) zurück -> Typecast machen
 
 
 Bibliotheksaufrufe & Fehler:
 - Pthread Bibliotheksaufrufe geben bei Erfolg Null, ansonsten Fehlercode zurück
+- Klartext des Fehlers ausgeben: strerror(fehlercode)
+- Beispiel:
+    if (rtn = pthread_create(...))
+        fprintf(stderr, "Fehler: pthread_create, %s\n", strerror(rtn));
+    }
+- Rausfinden, welche Fehler eine Pthread-Funktion schmeisst: "man pthread_create"
 - Fehlercodes sind in errno.h definiert
     -> Im Code "#include <errno.h>", dann gibts z.B. "EINVAL" (ungültige Argumente)
-- Alternativ: Klartext des Fehlers ausgeben: fprintf(stderr, "Fehler: %s\n", strerror(rtn));
 
 
 Threads vs. Prozesse:
@@ -207,6 +213,7 @@ Pthreads (highlevel)
         - Warum gibts Closure / Erlang?
         - Um einfach parallele Programme schreiben zu können
         - Aber anderer Lösungsansatz: In Closure/Erlang gibts keinen shared state
+- Identität: pthread_self (kann in Kombination mit pthread_equal(id) überprüfen, ob es sich bei einem Thread um sich selbst handelt)
 - Beispiel:
     int pthread_create(
         pthread_t *thread,                  <----- Identifier (ID) (wird von pthread_create in pthread_t reingeschrieben)
