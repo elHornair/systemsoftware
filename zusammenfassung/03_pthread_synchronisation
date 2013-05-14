@@ -142,7 +142,46 @@ Mutexe und Prozesse:
 
 
 Bedingungsvariablen:
-- ...
+- Condition Variable
+- Synchronisationswerkzeug
+- Mutex: Kontrolle des Zugangs zu Ressource
+- Bedingungsvariable: Benachrichtigung bei Zustandsänderung von Ressource
+- Benutzung:
+    - Warten auf Bedingung (Signal), evtl. mit Timeout
+    - Signal:
+        - pthread_cond_signal(&cv)
+        - pthread_cond_broadcast(&cv)
+        - Achtung: Diese Signale haben nichts mit Unix-Signalen zu tun
+-Wenn viele Threads warten:
+    - 1. Priorität
+    - 2. FIFO (weil mit mehreren Prioritäten Starvation möglich)
+    - Broadcast - alle wachen auf und versuchen zu locken
+- Unerwünschtes Aufwecken (spurious wakeups):
+    - Standard erlaubt der Library Aufwachsignale zu generieren (evtl. wegen Implementation im Userspace?)
+    - Deshalb:
+        lock(&m)
+        while(!bedingung)
+            cond_wait(&cv, &m)
+        unlock(&m)
+- Attribute:
+    - pthread_condattr_t
+    - pthread_condattr_init
+    - pthread_condattr_destroy
+    - _POSIX_THREAD_PROCESS_SHARED ist definiert,
+      wenn OS Kommunikation von Bedingungsvariablen zwischen mehreren Prozessen erlaubt
+- Signal Handler & Bedingungsvariablen:
+    - Standard definiert nicht, was passiert, wenn Bedingungsvariable aus Signalhandler signalisiert wird
+    - Bedingungsvariablen sind synchron
+    - Unix Signale sind asynchron!
+- Read-Write-Locks:
+    - Z.B. können mehrere gleichzeitig lesen. Wenn aber einer schreibt, kann niemand lesen/schreiben
+    - Semantisch nicht eindeutig:
+        - Queue für Reader/Writer?
+        - Sonst Starvation möglich (wenn Reader immer überlappend Lock holen, so dass nie ein Writer dran kommt)
+
+
+
+
 
 
 
@@ -175,3 +214,4 @@ TODO:
 
 
 stand unterricht: Folie 91
+letzter unterricht: quer durcheinander, pdf fertig (siehe notes für details)
