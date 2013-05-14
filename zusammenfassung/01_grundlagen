@@ -45,7 +45,8 @@ Warum Threads?
 Was sind Threads?
 - Semantisch: Voneinander parallel ausgeführte Programmteile innerhalb des gleichen Prozesses
 - Syntaktisch: Z.B. mit pthread_create (Thread erstellen mit Pthreads)
-- Pthread definiert Thread durch Funktion, die Start und Ende des Threads definiert
+- Es gibt Threads auch auf höheren Ebenen: Java, Ruby, ...
+- Linux per se hat keine Threads, diese kommen erst mit libc
 
 
 Ressourcenaufteilung Thread:
@@ -59,8 +60,12 @@ Ressourcenaufteilung Thread:
     -> Stack baut sich auf (mit jedem Verschachtelungslevel)
 
 
-Potentieller Parallelismus - Wo bieten sich Threads an?
-- Unabhängige Aufgaben:
+Parallelismus / Potentieller Parallelismus - Wo bieten sich Threads an?
+- Pseudo-Parallelität: Timesharing (mehrere Prozesse teilen einen Core)
+- Echte Parallelität bringt neues Problem mit sich:
+    - Gewisse Teilaufgaben hangen voneinander ab
+    -> D.h. man kann nur voneinander unabhängige Aufgaben parallelisieren
+- Allgemein: Unabhängige Aufgaben:
     - Unterschiedliche Ressourcen
     - Resultat ist unabhängig von Ausführungsreihenfolge der Teilaufgaben
     -> Je mehr Abhängigkeiten, um so mehr geblockte Tasks, die aufeinander warten
@@ -75,29 +80,48 @@ Potentieller Parallelismus - Wo bieten sich Threads an?
     - z.B: Netzwerk, User-I/O (Tastatur, Maus, ...), Hardware-Interrupts
     - Zufällige Intervalle zwischen Daten I/O
     -> Behandlungsroutinen können in einen Thread gekapselt werden
-- Realtime-Scheduling:
-    - Unterschiedliche Prioritäten der Aufgaben
+- I/O, respektive blockierendes I/O -> früher wurde CPU während I/O nicht benutzt
+    -> Deshalb: Maschinenbefehle aufgeteilt, so dass während verarbeiten von Datum schon wieder nächstes gelesen wird
+- Realtime:
+    - z.B. Videostreaming, Telefonie, ...
 
 
-Konkurrentes Programmieren:
+Paralleles / Konkurrentes Programmieren:
 - Hierzu gehören:
-    - Parallele Ausführung
-    - Synchronisierung
+    - Parallele Ausführung (kann auch implizit sein):
+        - z.B. bei Erlang (alles parallel)
+        - XSLT (Engine parallelisiert selbst, man deklariert nur)
+        - CSS (browser kümmert sich drum)
+    - Synchronisierung:
+        - Muss nicht zwingend benutzt werden
+        - Wenn ich z.B. nur eine Message broadcasten will, brauche ich keine Synchronisation
     - Kommunikation / Datenaustausch
 - Reihenfolge ist potentiell unbekannt / irrelevant
 - Konkurrent kann auch timeshared sein
-- Unter "nacktem" Unix:
-    - Forking:
-        - Elternteil / Kind
-        - Beide haben jeweils eigene PID
-        - Command: fork (Return-Wert ist PID oder 0)
-    - Vorteile: Speicher- und Ressourcenschutz, sehr einfach
-    - Nachteile: Aufwändige Synchronisation, ziemlich unübersichtlich
+- Unter "nacktem" Unix mit Forking:
+    - Vergabelung
+    - Prozess wird kopiert (Elternteil / Kind)
+    - Die beiden Prozesse sind voneinander unabhängig, es ist für A nicht möglich, auf die Daten von B zuzugreifen
+    - Beide haben jeweils eigene PID
+    - Interprozesskommunikation: "Everything's a file" -> A schreibt Daten in File, B liest sie
+    - Child hat auf gleiche Ressourcen Zugriff, wie Parent (gleiche Rechte, etc.)
+    - Command: fork (Return-Wert ist PID oder 0)
+    - Fork gibt zurück:
+        - 0 für Kind
+        - PID des für Parent-Prozess
+        -> Dies wird verwendet, um die Prozesse im Folgenden voneinander zu unterscheiden (Parent oder Child?)
+    - Vorteile:
+        - Speicher / Ressourcenschutz
+        - Sehr einfach
+    - Nachteile
+        - Speicherschutz (weil manchmal möchte man ja Daten teilen)
+        - Synchronisation ist aufwändiger
+        - Unübersichtlich
 - Mit Threads:
     - Weniger Programmoverhead
     - Weniger Systemoverhead
     - Keine Eltern:
-        - Threads sind gleichwertig
+        - Threads sind gleichwertig/gleichberechtigt
         - Es gibt allerdings noch den "Main-Thread"
 
 
@@ -169,13 +193,33 @@ Beispiele für Multithreaded Applikationen:
 
 Pthreads (highlevel)
 -----------------------------------------------------------------------------------------------------
-- Einfach zu benutzen (im historischen Kontext, heute im Verhältnis eher schwierig)
-- Lightweight (stimmt auch heute noch)
-- Portabel (stimmt auch heute noch, abgesehen von Windows -> Dafür gibts aber weitere Abstraktion: ApacheRuntime)
-- Java-Syntaktisch
+- Definiert Thread durch Funktion, die Start und Ende des Threads definiert
+- Syntaxdefinition (Standard) ist so alt wie Pthreads selbst
+- Fun fact: Semantik war bis vor ca. 2 Jahren nicht als Standard definiert
+- Vorteile:
+    - Einfach zu benutzen (im historischen Kontext, heute im Verhältnis eher schwierig)
+    - Lightweight (stimmt auch heute noch)
+    - Portabel (stimmt auch heute noch, abgesehen von Windows -> Dafür gibts aber weitere Abstraktion: ApacheRuntime)
+    - Java-Syntaktisch
 - Anwendungen:
     - Ada, Concurrent Pascal
     - Closure, Erlang
         - Warum gibts Closure / Erlang?
         - Um einfach parallele Programme schreiben zu können
         - Aber anderer Lösungsansatz: In Closure/Erlang gibts keinen shared state
+- Beispiel:
+    int pthread_create(
+        pthread_t *thread,                  <----- Identifier (ID) (wird von pthread_create in pthread_t reingeschrieben)
+        const pthread_attr_t *attr,         <----- Attribute, die Thread konfigurieren
+        void *(*start_routine)(void*),      <----- Funktion, die von Thread ausgeführt wird (Void-Pointer: Argument und Rückgabewert sind beliebig)
+        void *arg);                         <----- Parameter, die Thread übergeben werden
+
+
+Some things about C
+-----------------------------------------------------------------------------------------------------
+- Parameterübergabe ist immer "by value" (auch für komplexe Datentypen wie struct), ausser es wird explizit ein Pointer übergeben
+
+Pointer:
+- Referenzierungsoperator: myPointer = &myVar (gibt den Pointer einer Variable zurück, also eine Referenz der Variable)
+- Dereferenzierungsoperator: myVar = *myPointer (gibt die Variable, auf die der Pointer zeigt zurück)
+- Beispiel: int* a = &A; (dem int-pointer a wird der Pointer zugewiesen, der auf die Variable A zeigt)
