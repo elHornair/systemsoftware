@@ -214,12 +214,16 @@ Pthreads (highlevel)
         - Um einfach parallele Programme schreiben zu können
         - Aber anderer Lösungsansatz: In Closure/Erlang gibts keinen shared state
 - Identität: pthread_self (kann in Kombination mit pthread_equal(id) überprüfen, ob es sich bei einem Thread um sich selbst handelt)
-- Beispiel:
+
+Commands:
+- Thread erstellen:
     int pthread_create(
         pthread_t *thread,                  <----- Identifier (ID) (wird von pthread_create in pthread_t reingeschrieben)
         const pthread_attr_t *attr,         <----- Attribute, die Thread konfigurieren
         void *(*start_routine)(void*),      <----- Funktion, die von Thread ausgeführt wird (Void-Pointer: Argument und Rückgabewert sind beliebig)
         void *arg);                         <----- Parameter, die Thread übergeben werden
+- pthread_detach: Thread detachen, d.h. Referenz auf Thread löschen (Thread ist jetzt auf sich selbst gestellt)
+- pthread_join: Resultat vom Worker-Thread wieder holen
 
 
 Some things about C

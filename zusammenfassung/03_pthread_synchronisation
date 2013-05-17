@@ -14,6 +14,17 @@ Allgemein:
     - In Thread-Welt:
         - pthread_join(...) (analog zu waitpid)
         - Mutexe
+- Spezifische Probleme:
+    - Dead lock (z.B. wenn zwei Threads von vorne und hinten durch gleiche Liste loopen um zu sortieren)
+    - Race conditions (wegen falscher Annahme, wer zuerst fertig ist -> schwierig zu debuggen)
+    - Ressource starvation:
+        - Thread "verhungert"
+        - Kann nie auf die Ressource zugreifen, die er braucht, weil diese immer von anderen blockiert sind
+- Immer Synchronisationswerkzeuge verwenden bei geteilten Ressourcen. Wenn nicht:
+    - Bugs, wenn zwei Threads gleichzeitig auf Ressource zugreifen
+    - Bugs können auch versteckt sein und erst "irgendwann" auftauchen
+    - Debugging schwiereig (100 mal richtig, 1 mal falsch)
+
 
 
 Synchronizationswerkzeuge:
@@ -107,6 +118,7 @@ Mutex-Variablen:
             - Reader/Writer-Lock ist so nicht möglich
             - Rekursive Locks sind so nicht möglich
     - Lock-Contention (Streit, Zank):
+        - Prios: Bsp. Bank -> Statistik tiefe Prio, Shutdown hohe Prio
         - Wenn mehrere Threads versuchen zuzugreifen: Höchste Priorität bekommt Lock
         - Problem: Priority Inversion
         - Lösung: weniger gemeinsame Ressourcen zwischen Threads verschiedener Prioritäten
