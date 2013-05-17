@@ -173,8 +173,10 @@ Mutexe und Prozesse:
 Bedingungsvariablen:
 - Condition Variable
 - Synchronisationswerkzeug
-- Mutex: Kontrolle des Zugangs zu Ressource
-- Bedingungsvariable: Benachrichtigung bei Zustandsänderung von Ressource
+- Zweck: Darauf warten, dass Ressource bestimmten Zustand erreicht
+- Unterschied zu Mutex:
+    - Mutex: Kontrolle des Zugangs zu Ressource
+    - Bedingungsvariable: Benachrichtigung bei Zustandsänderung von Ressource
 - Benutzung:
     - Warten auf Bedingung (Signal), evtl. mit Timeout
     - Signal:
