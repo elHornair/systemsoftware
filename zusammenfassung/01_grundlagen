@@ -6,7 +6,7 @@ Beispiele von Parallelismus in Hardware:
 - SMP / Multicore
 
 Geschichte Multithreading:
-- Threads: Seit ~1950 (Notizen, Folien sagen ca. 25 Jahre)
+- Threads: Seit ~1950, damals aber noch nicht gleichzeitig laufend (erst ab 1968, IBM)
 - Anfänge:
     - Ballistische Berechnunge
     - Echtzeit-Systeme (realtime systems)
