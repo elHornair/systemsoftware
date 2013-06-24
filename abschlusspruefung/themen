@@ -1,0 +1,38 @@
+Allgemein:
+-------------------
+- 15 bis 20 min
+- Keinen Code schreiben
+- 1 praktische Aufgabe (z.B. Wir haben diese und diese Struktur, was machen wir? -> Mutex verwenden, ...)
+- Rest: Ein paar Theoriefragen
+
+
+Themen MM
+-------------------
+-> Siehe Script (x und Häckchen)
+
+
+Themen pThreads
+-------------------
+- Beispiel für Aufgabe: simple.c (die drei Fragen) auf S.10
+- Prozesslayout (S.11) / Prozesslayout Multithreaded (S.13)
+- Was sind Threads? (S.14)
+- Potentieller Parallelismus (S.15-16)
+- Was macht Fork? (S.19)
+- S.21
+- S.22: pthread_create (Interface benutzen können)
+- Synchronisation (S.23)
+- Teilen von Ressourcen (S.24)
+- Identität -> Wer bin ich? (S.25)
+- Beendigung S.27
+- S.28
+- Warum Threads und nicht Prozesse? (S.31)
+- Aufgabenbereiche f. Threading (S.32)
+- S.35-37
+- Modelle (S.39-52), v.a. auch warum wir Threadpools brauchen und wies funktioniert
+- Datenbuffering (S.53)
+- Probleme: S.56
+- Pthread Synchronisation (S.73-90) -> Nicht alles voll detailliert, aber wichtigstes
+- Thread Pools (S.95) Warum braucht man sie? Wie würde man sie ungefähr umsetzen?
+- pthread_once (S.111)
+- Scheduling (S.133) -> Prioritätsumkehrung checken. Wann passiert das und warum? -> S.148
+- Das wärs :)
